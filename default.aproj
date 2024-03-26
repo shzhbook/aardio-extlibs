@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project ver="10" name="publishExtlibs" libEmbed="true" icon="..." ui="win" output="publishExtlibs.exe" CompanyName="单位名称" FileDescription="publishExtlibs" LegalCopyright="Copyright (C) 作者 2024" ProductName="publishExtlibs" InternalName="publishExtlibs" FileVersion="0.0.0.1" ProductVersion="0.0.0.1" publishDir="/dist/" dstrip="false" local="false" ignored="false">
+	<file name="main.aardio" path="main.aardio" comment="main.aardio"/>
+	<folder name="资源文件" path="res" embed="true" local="false" ignored="false">
+		<file name="sunny.aardio" path="res\sunny.aardio" comment="res\sunny.aardio"/>
+		<folder name="goquery" path="res\goquery" comment="res\goquery" local="false" embed="false" ignored="false">
+			<file name="MetalSucks.html" path="res\goquery\MetalSucks.html" comment="res\goquery\MetalSucks.html"/>
+			<file name="test.aardio" path="res\goquery\test.aardio" comment="res\goquery\test.aardio"/>
+		</folder>
+		<folder name="htmlquery" path="res\htmlquery" comment="res\htmlquery" local="false" embed="false" ignored="false">
+			<file name="golang - 搜索.html" path="res\htmlquery\golang - 搜索.html" comment="res\htmlquery\golang - 搜索.html"/>
+			<file name="test.aardio" path="res\htmlquery\test.aardio" comment="res\htmlquery\test.aardio"/>
+			<file name="test2.aardio" path="res\htmlquery\test2.aardio" comment="res\htmlquery\test2.aardio"/>
+			<file name="你好_百度搜索.html" path="res\htmlquery\你好_百度搜索.html" comment="res\htmlquery\你好_百度搜索.html"/>
+		</folder>
+		<file name="redis.aardio" path="res\redis.aardio" comment="res\redis.aardio"/>
+		<file name="tlsClient.aardio" path="res\tlsClient.aardio" comment="res\tlsClient.aardio"/>
+		<file name="jsonquery.aardio" path="res\jsonquery.aardio" comment="res\jsonquery.aardio"/>
+		<file name="xmlquery.aardio" path="res\xmlquery.aardio" comment="res\xmlquery.aardio"/>
+	</folder>
+	<folder name="窗体文件" path="dlg" comment="目录" embed="true" local="false" ignored="false"/>
+</project>
