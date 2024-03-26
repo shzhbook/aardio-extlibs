@@ -89,25 +89,30 @@ var packLib = function(libname){
 	fsys.delete(libTmpPath);
    	fsys.delete(tarFilePath);  
    	console.log("已打包完成，路径: ", tarFilePath+".lzma");
-   	libInfo["url"] = baseUrl + "/" + libname + ".tar.lzma";
+   	libInfo["url"] = "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/package/" + libname + ".tar.lzma";
    	return libInfo;
 }
 
 var packSamples = function(libInfos){
+	import win;
+	
 	fsys.enum( "\res", "*.*",function(dir,filename,fullpath,findData){ 
 		if(filename) return;
-		
+		console.log("正在打包库案例，库: ", dir)
+		var zipPath = io.fullpath("/dist/samples/"+dir+".zip");
+		fsys.delete(zipPath);
+		win.delay(100)
 		ZipFile.CreateFromDirectory (
 			fullpath,
-			io.fullpath("/dist/samples/"+dir+".zip"),
+			zipPath,
 			0,false )
 		var sampleInfo = {
     		"version": libInfos[dir]["version"],
-    		"zipUrl": baseUrl + "/" + dir + ".zip"
+    		"zipUrl": "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/samples/" + dir + ".zip"
 		}
 		string.save("/dist/samples/"+dir+".json", ..web.json.stringify(sampleInfo,true));
 	},false);
-	
+	console.log("打包案例完成 ")
 }
 
 

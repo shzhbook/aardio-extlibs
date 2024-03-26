@@ -1,0 +1,352 @@
+//下载扩展库
+import fonts.fontAwesome;
+import win.ui;
+/*DSG{{*/
+var winform = win.form(text="aardio 扩展库";right=798;bottom=503;bgcolor=16777215)
+winform.add(
+btnCheckAll={cls="plus";text="全选";left=13;top=7;right=96;bottom=33;align="left";color=3355443;dl=1;dt=1;font=LOGFONT(h=-13);iconStyle={align="left";font=LOGFONT(h=-15;name='FontAwesome');padding={top=1}};iconText='\uF0C8 ';notify=1;textPadding={left=24};z=5};
+btnSearch={cls="plus";left=757;top=7;right=787;bottom=33;align="left";border={bottom=1;color=-6908266};color=3947580;dr=1;dt=1;font=LOGFONT(h=-13);iconStyle={align="left";font=LOGFONT(h=-13;name='FontAwesome');padding={left=8}};iconText='\uF002';notify=1;textPadding={left=25};z=6};
+btnSetup={cls="button";text="安装/更新";left=446;top=444;right=772;bottom=500;bgcolor=16777215;color=14120960;db=1;dr=1;font=LOGFONT(h=-14);note="开发环境运行代码会自动安装缺少的扩展库";z=3};
+editKeyword={cls="plus";left=519;top=7;right=757;bottom=33;align="right";border={bottom=1;color=-6908266};dr=1;dt=1;editable="edit";font=LOGFONT(h=-13);notify=1;textPadding={top=3;bottom=3};z=7};
+lbInfo={cls="static";text='\u2514\u2500\u2500 鼠标双击上面扩展库名字查看范例。';left=12;top=444;right=787;bottom=467;color=3355443;db=1;dl=1;dr=1;transparent=1;z=1};
+lbKeyword={cls="static";text="库名称或用途关键词：";left=302;top=15;right=515;bottom=36;align="right";color=3355443;dl=1;dr=1;dt=1;transparent=1;z=4};
+listview={cls="listview";left=9;top=40;right=787;bottom=440;bgcolor=16777215;db=1;dl=1;dr=1;dt=1;edge=1;fullRow=1;msel=false;z=2}
+)
+/*}}*/
+
+import ide;
+import win.ui.atom;
+var atom,hwnd = winform.atom("aardio.extlibs.CC700CFB-B4ED-4637-8F19-C76B3B8DC7F9");
+if(!atom){ 
+	win.showForeground(hwnd);
+	win.quitMessage();	
+	return;
+} 
+
+winform.listview.setExtended(0x4/*_LVS_EX_CHECKBOXES*/) 
+winform.listview.insertColumn("扩展库",135) 
+winform.listview.insertColumn("版本",70) 
+winform.listview.insertColumn("本地版本",70) 
+winform.listview.insertColumn("作者",80)  
+winform.listview.insertColumn("说明",-1) 
+
+winform.show() 
+winform.text = "aardio 扩展库 - 正在获取服务器列表...."
+
+
+showLibs = function(libs){
+    winform.listview.clear();
+    winform.listview.redraw();
+    
+	if( libs ){ 
+		var installedLibs = ide.getExtLibs(); 
+		
+		var data = { fields={"name","version","installedVersion","author","description"}}
+		for(libName,libInfo in libs){
+			table.push(data,{ 
+				name=libName;
+				version=libInfo.version;
+				installedVersion=installedLibs[libName][["version"]] : "未安装";
+				author=libInfo.author;
+				description=libInfo.description;
+				weight=libInfo.weight:0 ;
+				checked=true;
+			}) 
+		}
+		
+		table.sort(data,function(next){
+			if(owner.weight==next.weight)return owner.name < next.name;
+			 
+			return  owner.weight>next.weight 
+			
+		})
+	 
+		winform.listview.setTable(data);
+		for(i=1;#data;1){
+			if( data[i].installedVersion!="未安装") winform.listview.setChecked(i,true) 
+		}
+		
+		winform.text = "aardio 扩展库";
+	}
+	else {
+		winform.text = "aardio 扩展库";
+	} 	
+}
+
+var requestLibInfo = function(libName){
+	return ..thread.invokeAndWait(
+		function(libName){
+			import web.rest.jsonLiteClient;
+			
+			var url = "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/exlibs.json";
+			var http = web.rest.jsonLiteClient(null,"");
+			var libApi = http.api(url)
+			var listLib = libApi.get();
+			http.close();
+			var lib = libName ? listLib[libName] : listLib;
+			return lib;
+		},libName
+	) 
+};
+
+ide.requestLibInfo = requestLibInfo;
+var libs = ide.requestLibInfo(); 
+
+if(type(libs)!="table" || !table.next(libs)){
+    showLibs();
+    winform.text = "aardio 扩展库 — 无法连接服务器，请检查网络故障或稍后重试！"
+}
+else {
+	showLibs( libs );
+}
+
+winform.btnSetup.oncommand = function(id,event){
+	winform.btnSetup.disabled = true;
+	
+	var installedLibs = ide.getExtLibs(); 
+	for(i=winform.listview.count;1;-1){
+		if( winform.listview.getChecked(i) ){
+			var libName = winform.listview.getItemText(i,1) ;
+			var libVersion = winform.listview.getItemText(i,2) ;
+			var installVersion = installedLibs[libName][["version"]];
+			
+			if( installVersion != libVersion ){
+				winform.text = "aardio 扩展库 - 正在安装库:" + libName;
+				
+				thread.invokeAndWait(
+					function(libName,requestLibInfo){
+						import ide;
+						ide.requestLibInfo = requestLibInfo;
+						ide.installLib( libName )
+					} ,libName,requestLibInfo
+				)
+				
+				if(  ..win.isClosed() ) return;
+				 
+				installedLibs = ide.getExtLibs(); 
+				winform.listview.setItemText(installedLibs[libName][["version"]]:"安装失败",i,3);
+				if( installedLibs[libName][["version"]] == libVersion ){
+					winform.text = "aardio 扩展库 - 已安装库:"  + libName;
+				}
+				else {
+					winform.text = "aardio 扩展库 - "  + libName + " 安装失败!";
+				}
+				
+			}
+			else {
+				winform.text = "aardio 扩展库 - 忽略已安装库:" + libName;
+			}
+			
+		}
+	} 
+	
+	winform.text = "aardio 扩展库 - 安装已完成" ;
+	ide.refreshStdLib();
+	winform.btnSetup.disabled = false;
+}
+
+import ide;
+import inet.downBox;
+import process;
+import zlib.unzip;
+import fsys;
+fsys.createDir( "/.KanadeBlisstSampleCode/");
+
+var requestLibSample = function(libName){
+	if( !libName ) error("请指定库名称参数",2);
+	return ..thread.invokeAndWait(
+		function(libName){
+			import web.rest.jsonLiteClient;
+			var http = web.rest.jsonLiteClient(null,"");
+			var url = "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/samples/{libName}.json"
+			var libApi = http.api(url)
+			var listLib = libApi[libName].get();
+			return listLib;
+		},libName
+	) 
+};
+
+var openSample = function(libName){
+	var libInfo = requestLibSample(libName)
+	if( !libInfo ){
+		winform.lbInfo.text = "抱歉,暂时没有找到 " + libName + " 扩展库有关的范例"
+		//..process.execute("http://api.aardio.com/v10/pages/search?q=" + libName);
+		return;
+	}; 
+		
+	if( libInfo.siteUrl ){
+		..process.execute( libInfo.siteUrl );
+	}
+	elseif( libInfo.codeUrl ){
+		var code,err = thread.invokeAndWait(
+			function(url){
+				import inet.http;
+				var http = inet.http();
+				http.disableCache();
+				return http.get(url);
+			},libInfo.codeUrl
+		)
+		if(!code) return;
+		var codePath = "/.KanadeBlisstSampleCode/" + libName + ".aardio";
+		string.save(codePath,code )
+		winform.show( 0x6/*_SW_MINIMIZE*/ )
+		ide.openDocument(io.exist(codePath))
+	}
+	elseif( libInfo.zipUrl ){
+		var codePath = "/.KanadeBlisstSampleCode/" + libName + ".zip";
+		var downBox = inet.downBox(winform,"/.KanadeBlisstSampleCode/" + libName,true )
+
+		if( downBox.download(libInfo.zipUrl , codePath ) ){
+	 		var ok,err = zlib.unzip.extract( codePath, "/.KanadeBlisstSampleCode/" + libName ) 
+	 		..process.explore("/.KanadeBlisstSampleCode/" + libName)
+	 	} 
+	}
+	elseif( libInfo.codePath ){
+		ide.openDocument(  libInfo.codePath )
+	}
+	else{
+		winform.lbInfo.text = "抱歉,暂时没有找到与 " + libName + "扩展库有关的范例"
+		//..process.execute("http://api.aardio.com/v10/pages/search?q=" + libName);
+		return;
+	};	
+}
+
+winform.listview.onnotify = function(id,code,ptr){
+
+    select(code) { 
+        case 0xFFFFFFFB/*_NM_RCLICK*/  {
+			
+			var x,y = win.getCursorPos();
+			winform.popmenu = win.ui.popmenu(winform);
+			
+		 
+			var item,libName = winform.listview.getSelection(,1)
+			winform.popmenu.add("安装 / 更新",function(id){ 
+				winform.text = "aardio 扩展库";
+				
+				if( ide.installLib( libName ) ){
+					winform.listview.setChecked(item,true);
+					winform.lbInfo.text = "扩展库 " + libName + " 已安装或更新到最新版本" ;
+					winform.text = "aardio 扩展库 - " + libName + " 已安装或更新到最新版本" 
+				}
+			});	 
+		 	winform.popmenu.add("查看范例",function(id){ 
+				 if(libName) openSample(libName);
+			});	 
+	
+			winform.popmenu.popup(x,y,true);
+		}
+    	case 0xFFFFFFFD/*_NM_DBLCLK*/ {
+    		var nm = winform.listview.getNotifyMessage(code,ptr)
+    		if(winform.listview.selIndex){
+        		var libName = winform.listview.getItemText(nm.iItem,1)
+        		if(libName) openSample(libName);
+        	}
+    	}
+    }
+}
+
+import win.debounce;
+var search = win.debounce( 
+function(id,event){
+    	var k = winform.editKeyword.text;
+    	if(#k) k = string.trim(k);
+    	
+    	if(!#k){
+    		showLibs( requestLibInfo(baseUrl) );
+    		return;
+    	}
+    	
+    	var libs = requestLibInfo(baseUrl); 
+    	if(type(libs)!="table" || !table.next(libs)){
+    		showLibs();
+    		winform.text = "aardio 扩展库 — 无法连接服务器，请检查网络故障或稍后重试！"
+    		return;
+    	}
+    	
+    	keywords = string.splitEx(string.lower(k),"\s+");
+     	
+    	var result = {}
+    	for(name,libInfo in libs){ 
+    	    
+    		for(i,k in keywords){
+    		    if(string.indexOf(string.lower(name),k)) {
+    				result[name] = libInfo;
+    				continue;
+    			}
+    		
+    			if(libInfo.keywords){
+    				if(string.indexOf(string.lower(libInfo.keywords),k)) {
+    					result[name] = libInfo;
+    					continue;
+    				}
+    			}
+    			
+    			if(libInfo.description){
+    				if(string.indexOf(string.lower(libInfo.description),k)) {
+    					result[name] = libInfo;
+    					continue;
+    				}
+    			}
+    			
+    			if(libInfo.author){
+    				if(string.indexOf(libInfo.author,k)) {
+    					result[name] = libInfo;
+    					continue;
+    				}
+    			}
+    			
+    			if(string.indexOf(name,k)) {
+    				result[name] = libInfo;
+    				continue;
+    			}
+    		} 
+    	};
+    	
+		showLibs( result );
+	}
+)
+
+winform.onOk = function(){
+    winform.listview.clear();
+    search();
+}
+
+winform.editKeyword.editBox.onChange = function(){ 
+	if(owner.onModified)owner.onModified(true);
+	search();
+}
+winform.editKeyword.setFocus();
+
+winform.btnCheckAll.checked = true;
+winform.btnCheckAll.oncommand = function(id,event){
+	var checked = owner.checked;
+	for(i=winform.listview.count;1;-1){
+		winform.listview.setChecked(i,checked) 
+	} 
+}
+
+winform.btnSearch.skin({
+	color={
+		active=0xFF00FF00;
+		default=0xFF3C3C3C;
+		disabled=0xFF6D6D6D;
+		hover=0xFFFF0000
+	}
+})
+
+winform.btnCheckAll.skin({
+	color={
+		active=0xFF00FF00;
+		default=0xFF000000;
+		disabled=0xEE666666;
+		hover=0xFFFF0000
+	};
+	checked={
+		iconText='\uF14A'
+	}
+})
+  
+win.showForeground(winform.hwnd); 
+
+win.loopMessage();
