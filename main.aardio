@@ -9,6 +9,8 @@ import System.IO.Compression.ZipFile;
 
 
 var ZipFile = System.IO.Compression.ZipFile;
+// https://github.com/kanadeblisst00/aardio-extlibs
+thread.set("GithubRepo", "http://git.pygrower.cn/kanadeblisst/aardio-extlibs");
 
 ::DEBUG = true;
 
@@ -27,7 +29,6 @@ win.msgboxTimeout("${LIBNAME} 扩展库已安装成功!","aardio- ${LIBNAME}扩�
 */
 
 var tmpPath = "\.temp";
-var baseUrl = "http://git.pygrower.cn/kanadeblisst/aardio-extlibs";
 
 var getLibInfo = function(libpath){
 	var code = string.load(libpath);
@@ -89,7 +90,7 @@ var packLib = function(libname){
 	fsys.delete(libTmpPath);
    	fsys.delete(tarFilePath);  
    	console.log("已打包完成，路径: ", tarFilePath+".lzma");
-   	libInfo["url"] = "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/package/" + libname + ".tar.lzma";
+   	libInfo["url"] = thread.get("GithubRepo") + "/raw/branch/master/dist/package/" + libname + ".tar.lzma";
    	return libInfo;
 }
 
@@ -108,7 +109,7 @@ var packSamples = function(libInfos){
 			0,false )
 		var sampleInfo = {
     		"version": libInfos[dir]["version"],
-    		"zipUrl": "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/samples/" + dir + ".zip"
+    		"zipUrl": thread.get("GithubRepo") + "/raw/branch/master/dist/samples/" + dir + ".zip"
 		}
 		string.save("/dist/samples/"+dir+".json", ..web.json.stringify(sampleInfo,true));
 	},false);

@@ -1,4 +1,4 @@
-//下载扩展库
+//非官方扩展库
 import fonts.fontAwesome;
 import win.ui;
 /*DSG{{*/
@@ -22,6 +22,8 @@ if(!atom){
 	win.quitMessage();	
 	return;
 } 
+// https://github.com/kanadeblisst00/aardio-extlibs
+thread.set("GithubRepo", "http://git.pygrower.cn/kanadeblisst/aardio-extlibs");
 
 winform.listview.setExtended(0x4/*_LVS_EX_CHECKBOXES*/) 
 winform.listview.insertColumn("扩展库",135) 
@@ -78,12 +80,20 @@ var requestLibInfo = function(libName){
 		function(libName){
 			import web.rest.jsonLiteClient;
 			
-			var url = "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/exlibs.json";
+			var repoUrl = thread.get("GithubRepo");
+			var url = repoUrl + "/raw/branch/master/dist/exlibs.json";
 			var http = web.rest.jsonLiteClient(null,"");
 			var libApi = http.api(url)
 			var listLib = libApi.get();
 			http.close();
-			var lib = libName ? listLib[libName] : listLib;
+			var lib;
+			if(libName){
+				lib = listLib[libName];
+				lib["libName"] = libName;
+			}else{
+				lib = listLib;
+			}
+			
 			return lib;
 		},libName
 	) 
@@ -158,7 +168,7 @@ var requestLibSample = function(libName){
 		function(libName){
 			import web.rest.jsonLiteClient;
 			var http = web.rest.jsonLiteClient(null,"");
-			var url = "http://git.pygrower.cn/kanadeblisst/aardio-extlibs/raw/branch/master/dist/samples/{libName}.json"
+			var url = thread.get("GithubRepo") + "/raw/branch/master/dist/samples/{libName}.json"
 			var libApi = http.api(url)
 			var listLib = libApi[libName].get();
 			return listLib;
@@ -170,7 +180,6 @@ var openSample = function(libName){
 	var libInfo = requestLibSample(libName)
 	if( !libInfo ){
 		winform.lbInfo.text = "抱歉,暂时没有找到 " + libName + " 扩展库有关的范例"
-		//..process.execute("http://api.aardio.com/v10/pages/search?q=" + libName);
 		return;
 	}; 
 		
@@ -206,7 +215,6 @@ var openSample = function(libName){
 	}
 	else{
 		winform.lbInfo.text = "抱歉,暂时没有找到与 " + libName + "扩展库有关的范例"
-		//..process.execute("http://api.aardio.com/v10/pages/search?q=" + libName);
 		return;
 	};	
 }
